@@ -1,0 +1,35 @@
+---
+- name: Deploy HAZESOFT-1 on VM
+  hosts: 10.0.2.15
+  become: true
+  remote_user: bhim 
+  vars:
+    ansible_ssh_private_key_file: "~/.ssh/id_rsa.pub"
+ 
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Install Docker Compose
+      apt:
+        name: docker-compose  
+        state: present
+
+    - name: Clone the repository
+      git:
+        repo: https://github.com/veekrum/task
+        dest: /tmp/task
+
+    - name: Build Docker Image
+      command: docker build -t hazesoft-1 /tmp/task  
+
+    - name: Run Docker container
+      docker_container:
+        name: hazesoft-t1-container
+        image: hazesoft-1 
+        ports:
+          - "9000:80"
+      become: true
+
